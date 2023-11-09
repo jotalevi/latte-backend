@@ -1,8 +1,8 @@
 const config = {
   port: 3000,
-  scrape_url: 'https://ww2.gogoanimes.org',
+  scrape_url: 'https://ww6.gogoanimes.org',
   rule_path: {
-    popular: '/popular?page=',
+    popular: '/?page=',
     search: '/search?keyword=',
     anime: '/category/',
     episode: '/watch/',
