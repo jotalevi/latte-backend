@@ -1,27 +1,47 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Headers } from '@nestjs/common';
 import Scraper from '../utils/scraper';
+import { UserService } from 'src/user/user.service';
 
 @Controller()
 export class AnimeDataController {
-  constructor() {}
+  constructor(private userService: UserService) {}
 
   @Get('popular/:page')
-  getPopular(@Param('page') page): Promise<string> {
+  async getPopular(
+    @Param('page') page,
+    @Headers('token') token,
+  ): Promise<string> {
+    if (!(await this.userService.checkToken(token)))
+      return 'You must be logged in to use our services';
+
     return Scraper.popular(page);
   }
 
   @Get('a/:id')
-  getAnime(@Param('id') id): Promise<string> {
+  async getAnime(@Param('id') id, @Headers('token') token): Promise<string> {
+    if (!(await this.userService.checkToken(token)))
+      return 'You must be logged in to use our services';
     return Scraper.anime(id);
   }
 
   @Get('a/:id/:ep')
-  getAnimeEpisode(@Param('id') id, @Param('ep') ep): Promise<string> {
+  async getAnimeEpisode(
+    @Param('id') id,
+    @Param('ep') ep,
+    @Headers('token') token,
+  ): Promise<string> {
+    if (!(await this.userService.checkToken(token)))
+      return 'You must be logged in to use our services';
     return Scraper.episode(id, ep);
   }
 
   @Get('search/')
-  getSearchResults(@Query('search_str') searchStr): Promise<string> {
+  async getSearchResults(
+    @Query('search_str') searchStr,
+    @Headers('token') token,
+  ): Promise<string> {
+    if (!(await this.userService.checkToken(token)))
+      return 'You must be logged in to use our services';
     return Scraper.search(searchStr);
   }
 }

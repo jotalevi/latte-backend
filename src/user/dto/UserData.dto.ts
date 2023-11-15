@@ -6,5 +6,10 @@ export class UserDataDto {
 
 export class SeenAnimeEp {
   anime: string;
+  episodes: string;
+}
+
+export class SeenAnimeEps {
+  anime: string;
   episodes: string[];
 }

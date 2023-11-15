@@ -1,68 +1,56 @@
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { UserLoginDto } from './dto/UserLogin.dto';
-import { User } from './user.entity';
 import { UserCreateDto } from './dto/UserCreate.dto';
 import { UserDataDto, SeenAnimeEp } from './dto/UserData.dto';
+import { UserService } from './user.service';
 
 @Controller()
 export class UserController {
-  constructor() {}
+  constructor(private userService: UserService) {}
 
   @Get('u/:token')
   async getUserData(@Param('token') token: string): Promise<UserDataDto | any> {
-    let user = await User.findBytoken(token);
+    return await this.userService.getUserData(token);
+  }
 
-    if (!user)
-      return {
-        message: 'No user found with this ID',
-        status: 401,
-      };
-
-    let returnable = new UserDataDto();
-
-    returnable.favs = user.getFavs();
-    returnable.seen = user.getSeen();
-    returnable.username = user.getUsername();
-
-    return returnable;
+  @Get('u/invite/:token')
+  async getInviteUrl(@Param('token') token: string): Promise<string | any> {
+    return await this.userService.getInviteToken(token);
   }
 
   @Post('u/login')
   async loginUser(@Body() data: UserLoginDto): Promise<string | any> {
-    let user = await User.findByUsername(data.username);
-    let result = user.proofPass(data.password);
-
-    return {
-      message: result,
-      id: user.getId(),
-      status: result ? '200' : 403,
-    };
+    return await this.userService.loginUser(data);
   }
 
   @Post('u/register')
   async registerUser(@Body() data: UserCreateDto): Promise<string | any> {
-    let user = User.create();
-    user.setFavs([]);
-    user.setSeen([]);
-    user.setMail(data.mail);
-    user.setUsername(data.username);
-    user.setPassword(data.password);
-    await user.save();
-    return {
-      message: 'User created',
-      status: 200,
-    };
+    return await this.userService.registerUser(data);
   }
 
-  @Post('getFavs')
-  getFavs() {}
+  @Get('u/favs/:token')
+  async getFavs(@Param('token') token: string): Promise<string | any> {
+    return await this.userService.getUserFavs(token);
+  }
 
-  @Post('setFavs')
-  setFavs() {}
+  @Post('u/favs/:token')
+  async setFavs(
+    @Param('token') token: string,
+    @Body('id') animeId: string,
+  ): Promise<string | any> {
+    return await this.userService.pushFavs(token, animeId);
+  }
 
-  @Post('getSeen')
-  getSeen() {}
+  @Get('u/seen/:token')
+  async getSeen(@Param('token') token: string): Promise<string | any> {
+    return await this.userService.getUserSeen(token);
+  }
 
-  @Post('setSeen')
-  setSeen() {}
+  @Post('u/seen/:token')
+  async setSeen(
+    @Param('token') token: string,
+    @Body() seenData: SeenAnimeEp,
+  ): Promise<string | any> {
+    return await this.userService.pushSeen(token, seenData);
+  }
 }

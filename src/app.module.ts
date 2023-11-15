@@ -1,24 +1,26 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AnimeDataModule } from './animeData/animeData.module';
 import { UserModule } from './user/user.module';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    //TypeOrmModule.forRoot({
-    //  type: 'mysql',
-    //  host: 'localhost',
-    //  port: 3306,
-    //  username: 'root',
-    //  password: 'root',
-    //  database: 'test',
-    //  entities: [],
-    //  synchronize: true,
-    //}),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     AnimeDataModule,
     UserModule,
+    MongooseModule.forRootAsync({
+      useFactory: () => {
+        return {
+          uri: process.env.MONGO_URL,
+        };
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
