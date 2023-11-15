@@ -2,13 +2,20 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
-import { SeenAnimeEp, UserDataDto } from './dto/UserData.dto';
-import { UserLoginDto } from './dto/UserLogin.dto';
-import { UserCreateDto } from './dto/UserCreate.dto';
+import { SeenAnimeEp, UserDataDto } from '../dto/UserData.dto';
+import { UserLoginDto } from '../dto/UserLogin.dto';
+import { UserCreateDto } from '../dto/UserCreate.dto';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { SeenData } from 'src/seenData/seenData.schema';
 import { InviteData } from 'src/inviteData/inviteData.schema';
+import { ReturnUserDataDto } from 'src/dto/ReturnUserData.dto';
+import { ReturnErrorDto } from 'src/dto/ReturnError.dto';
+import { ReturnInviteTokenDto } from 'src/dto/ReturnInviteToken.dto';
+import { ReturnAuthTokenDto } from 'src/dto/ReturnAuthToken.dto';
+import { ReturnUserCreatedDto } from 'src/dto/ReturnUserCreated.dto';
+import { ReturnUserFavsDto } from 'src/dto/ReturnUserFavs.dto';
+import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
 
 @Injectable()
 export class UserService {
@@ -25,17 +32,33 @@ export class UserService {
     else return true;
   }
 
-  async getUserData(token: string): Promise<UserDataDto | any> {
+  async getUserData(
+    token: string,
+  ): Promise<ReturnUserDataDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ token: token }).exec();
-    if (!user) return 'invalid token';
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
 
     let seenData = await this.seenDataModel.find({ user: user.id }).exec();
     user.seen = seenData;
-    return user;
+    return user as ReturnUserDataDto;
   }
 
-  async getInviteToken(token: string): Promise<string | any> {
+  async getInviteToken(
+    token: string,
+  ): Promise<ReturnInviteTokenDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ token: token }).exec();
+
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
 
     if (user.invites_left > 0) {
       let inviteData = await this.inviteDataModel.create({
@@ -53,15 +76,26 @@ export class UserService {
         taken: false,
       });
 
-      return `i/${inviteData.token}`;
+      return { invite_token: inviteData.token };
     }
-    return 'No invites left for you :(';
+    return {
+      status: 405,
+      error_code: 'NO_INVITES',
+      message: "You can't invite anymore",
+    };
   }
 
-  async loginUser(data: UserLoginDto): Promise<string | any> {
+  async loginUser(
+    data: UserLoginDto,
+  ): Promise<ReturnAuthTokenDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ username: data.username }).exec();
 
-    if (!user) return 'Invalid credentials';
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
 
     var hash = crypto
       .pbkdf2Sync(data.password, user.salt, 1000, 64, `sha512`)
@@ -70,25 +104,52 @@ export class UserService {
     if (user.hash === hash) {
       user.token = uuidv4();
       user.save();
-      return user.token;
-    } else return false;
+      return { token: user.token };
+    } else
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
   }
 
-  async registerUser(data: UserCreateDto): Promise<string | any> {
-    let inviteData = await this.inviteDataModel.findOne({
-      token: data.invite_token,
-    });
+  async registerUser(
+    data: UserCreateDto,
+  ): Promise<ReturnUserCreatedDto | ReturnErrorDto> {
+    let inviteData = await this.inviteDataModel
+      .findOne({
+        token: data.invite_token,
+      })
+      .exec();
 
-    if (
-      (!inviteData || inviteData.taken) &&
-      data.invite_token != 'magicInvite_Duoc2023'
-    ) {
-      return 'Invite Invalid';
+    if ((!inviteData || inviteData.taken) && data.invite_token != '') {
+      return {
+        status: 403,
+        error_code: 'UNINVITED',
+        message: 'You must have a valid invite code to register',
+      };
     }
 
+    if (
+      (await this.userModel.find({ username: data.username }).exec()) ||
+      (await this.userModel.find({ mail: data.mail }).exec())
+    )
+      return {
+        status: 405,
+        error_code: 'Username or Mail taken',
+        message: 'There is already an account with this username or mail',
+      };
+
     if (inviteData) {
-      let user = await this.userModel.findOne({ id: inviteData.parent_user });
-      if (user.invites_left <= 0) return 'Invite Invalid';
+      let user = await this.userModel
+        .findOne({ id: inviteData.parent_user })
+        .exec();
+      if (user.invites_left <= 0)
+        return {
+          status: 403,
+          error_code: 'UNINVITED',
+          message: 'You must have a valid invite code to register',
+        };
       user.invites_left = user.invites_left - 1;
       await user.save();
     }
@@ -114,16 +175,35 @@ export class UserService {
       await inviteData.save();
     }
 
-    return await createdUser.save();
+    return (await createdUser.save()) as ReturnUserCreatedDto;
   }
 
-  async getUserFavs(token: string): Promise<string | any> {
+  async getUserFavs(
+    token: string,
+  ): Promise<ReturnUserFavsDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ token: token }).exec();
-    return user.favs;
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
+    return { favs: user.favs };
   }
 
-  async pushFavs(token: string, animeId: string): Promise<string | any> {
+  async pushFavs(
+    token: string,
+    animeId: string,
+  ): Promise<ReturnUserFavsDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ token: token }).exec();
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
     if (user.favs.includes(animeId)) {
       user.favs.splice(user.favs.indexOf(animeId), 1);
     } else {
@@ -131,25 +211,56 @@ export class UserService {
     }
 
     await user.save();
-    return user.favs;
+    return { favs: user.favs };
   }
 
-  async getUserSeen(token: string): Promise<string | any> {
+  async getUserSeen(
+    token: string,
+  ): Promise<ReturnUserSeenDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ token: token }).exec();
+
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
     let seenData = await this.seenDataModel.find({ user: user.id }).exec();
-    return seenData;
+    return { seen: seenData };
   }
 
-  async getUserSeen_filter(token, animeId): Promise<string | any> {
+  async getUserSeen_filter(
+    token: string,
+    animeId: string,
+  ): Promise<ReturnUserSeenDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ token: token }).exec();
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
     let seenData = await this.seenDataModel
-      .find({ user: user.id, anime: animeId })
+      .findOne({ user: user.id, anime: animeId })
       .exec();
-    return seenData;
+
+    return { seen: [seenData] };
   }
 
-  async pushSeen(token: string, data: SeenAnimeEp): Promise<string | any> {
+  async pushSeen(
+    token: string,
+    data: SeenAnimeEp,
+  ): Promise<ReturnUserSeenDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ token: token }).exec();
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
     let seenData = await this.seenDataModel
       .findOne({ user: user.id, anime: data.anime })
       .exec();
@@ -158,7 +269,6 @@ export class UserService {
       if (!seenData.episodes.includes(data.episodes)) {
         seenData.episodes.push(data.episodes);
         await seenData.save();
-        return seenData;
       }
     }
 
@@ -169,6 +279,11 @@ export class UserService {
     });
 
     await returnable.save();
-    return returnable;
+
+    return {
+      seen: await this.seenDataModel
+        .find({ user: user.id, anime: data.anime })
+        .exec(),
+    };
   }
 }

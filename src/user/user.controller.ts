@@ -1,56 +1,75 @@
-import { Body, Controller, Param, Post, Get } from '@nestjs/common';
-import { UserLoginDto } from './dto/UserLogin.dto';
-import { UserCreateDto } from './dto/UserCreate.dto';
-import { UserDataDto, SeenAnimeEp } from './dto/UserData.dto';
+import { Body, Controller, Param, Post, Get, Headers } from '@nestjs/common';
+import { UserLoginDto } from '../dto/UserLogin.dto';
+import { UserCreateDto } from '../dto/UserCreate.dto';
+import { UserDataDto, SeenAnimeEp } from '../dto/UserData.dto';
 import { UserService } from './user.service';
+import { ReturnErrorDto } from 'src/dto/ReturnError.dto';
+import { ReturnUserDataDto } from 'src/dto/ReturnUserData.dto';
+import { ReturnInviteTokenDto } from 'src/dto/ReturnInviteToken.dto';
+import { ReturnAuthTokenDto } from 'src/dto/ReturnAuthToken.dto';
+import { ReturnUserCreatedDto } from 'src/dto/ReturnUserCreated.dto';
+import { ReturnUserFavsDto } from 'src/dto/ReturnUserFavs.dto';
+import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
 
 @Controller()
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get('u/:token')
-  async getUserData(@Param('token') token: string): Promise<UserDataDto | any> {
-    return await this.userService.getUserData(token);
+  @Get('u')
+  async getUserData(
+    @Headers('Authorization') token: string,
+  ): Promise<ReturnUserDataDto | ReturnErrorDto> {
+    return await this.userService.getUserData(token.split(' ')[1]);
   }
 
-  @Get('u/invite/:token')
-  async getInviteUrl(@Param('token') token: string): Promise<string | any> {
-    return await this.userService.getInviteToken(token);
+  @Get('u/invite')
+  async getInviteUrl(
+    @Headers('Authorization') token: string,
+  ): Promise<ReturnInviteTokenDto | ReturnErrorDto> {
+    return await this.userService.getInviteToken(token.split(' ')[1]);
   }
 
   @Post('u/login')
-  async loginUser(@Body() data: UserLoginDto): Promise<string | any> {
+  async loginUser(
+    @Body() data: UserLoginDto,
+  ): Promise<ReturnAuthTokenDto | ReturnErrorDto> {
     return await this.userService.loginUser(data);
   }
 
   @Post('u/register')
-  async registerUser(@Body() data: UserCreateDto): Promise<string | any> {
+  async registerUser(
+    @Body() data: UserCreateDto,
+  ): Promise<ReturnUserCreatedDto | ReturnErrorDto> {
     return await this.userService.registerUser(data);
   }
 
-  @Get('u/favs/:token')
-  async getFavs(@Param('token') token: string): Promise<string | any> {
-    return await this.userService.getUserFavs(token);
+  @Get('u/favs')
+  async getFavs(
+    @Headers('Authorization') token: string,
+  ): Promise<ReturnUserFavsDto | ReturnErrorDto> {
+    return await this.userService.getUserFavs(token.split(' ')[1]);
   }
 
-  @Post('u/favs/:token')
+  @Post('u/favs')
   async setFavs(
-    @Param('token') token: string,
+    @Headers('Authorization') token: string,
     @Body('id') animeId: string,
-  ): Promise<string | any> {
-    return await this.userService.pushFavs(token, animeId);
+  ): Promise<ReturnUserFavsDto | ReturnErrorDto> {
+    return await this.userService.pushFavs(token.split(' ')[1], animeId);
   }
 
-  @Get('u/seen/:token')
-  async getSeen(@Param('token') token: string): Promise<string | any> {
-    return await this.userService.getUserSeen(token);
+  @Get('u/seen')
+  async getSeen(
+    @Headers('Authorization') token: string,
+  ): Promise<ReturnUserSeenDto | ReturnErrorDto> {
+    return await this.userService.getUserSeen(token.split(' ')[1]);
   }
 
-  @Post('u/seen/:token')
+  @Post('u/seen')
   async setSeen(
-    @Param('token') token: string,
+    @Headers('Authorization') token: string,
     @Body() seenData: SeenAnimeEp,
-  ): Promise<string | any> {
-    return await this.userService.pushSeen(token, seenData);
+  ): Promise<ReturnUserSeenDto | ReturnErrorDto> {
+    return await this.userService.pushSeen(token.split(' ')[1], seenData);
   }
 }

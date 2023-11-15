@@ -2,9 +2,14 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 import config from './configs';
 import { parse, stringify } from 'flatted';
+import { ReturnPopularDto } from 'src/dto/ReturnPopular.dto';
+import { ReturnAnimeDto } from 'src/dto/ReturnAnime.dto';
+import { ReturnEpisodeDto } from 'src/dto/ReturnEpisode.dto';
+import { ReturnSearchResultDto } from 'src/dto/ReturnSearchResult.dto';
+import { ReturnSeenAnimeEps } from 'src/dto/ReturnUserData.dto';
 
 class Scraper {
-  static popular = async (page): Promise<string> => {
+  static popular = async (page: number): Promise<ReturnPopularDto> => {
     let resContent = {
       page: page ?? 1,
       og_title: 'Watch anime for free on UnLatte',
@@ -36,10 +41,13 @@ class Scraper {
       resContent.results.push(anime);
     });
 
-    return JSON.stringify(resContent);
+    return resContent;
   };
 
-  static anime = async (anime_id, userSeenData): Promise<string> => {
+  static anime = async (
+    anime_id: string,
+    userSeenData: ReturnSeenAnimeEps[],
+  ): Promise<ReturnAnimeDto> => {
     let resContent = {
       anime: anime_id,
       og_title: '',
@@ -79,10 +87,13 @@ class Scraper {
     resContent.og_title = `Whatch ${resContent.title} for free on Latte`;
     resContent.og_image = resContent.thumbnail;
 
-    return JSON.stringify(resContent);
+    return resContent;
   };
 
-  static episode = async (anime_id, episode_id): Promise<string> => {
+  static episode = async (
+    anime_id: string,
+    episode_id: string,
+  ): Promise<ReturnEpisodeDto> => {
     let resContent = {
       anime: anime_id,
       episode: episode_id,
@@ -127,10 +138,10 @@ class Scraper {
       resContent.nextEp = nxtContent.split('-').slice(-1)[0];
     }
 
-    return JSON.stringify(resContent);
+    return resContent;
   };
 
-  static search = async (query_str): Promise<string> => {
+  static search = async (query_str: string): Promise<ReturnSearchResultDto> => {
     let resContent = {
       query: query_str,
       og_title: "Results for ' " + query_str + "' on UnLatte",
@@ -170,7 +181,7 @@ class Scraper {
       if (unique) resFilterHandle.push(animeInResult);
     });
     resContent.results = resFilterHandle;
-    return JSON.stringify(resContent);
+    return resContent;
   };
 }
 
