@@ -29,7 +29,8 @@ class Scraper {
         .children()
         .children()
         .attr('href')
-        .replace('/category/', '');
+        .replace('/category/', '')
+        .replace('/watch/', '');
       anime.thumbnail = $(el).children().children().children().attr('src');
       anime.title = $(el).children('.name').children().text();
       resContent.results.push(anime);
@@ -38,13 +39,13 @@ class Scraper {
     return JSON.stringify(resContent);
   };
 
-  static anime = async (anime_id): Promise<string> => {
+  static anime = async (anime_id, userSeenData): Promise<string> => {
     let resContent = {
       anime: anime_id,
       og_title: '',
       og_image: '',
       info: '',
-      seen: [],
+      seen: userSeenData,
       title: '',
       thumbnail: '',
       type: '',

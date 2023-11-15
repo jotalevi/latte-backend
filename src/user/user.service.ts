@@ -26,7 +26,12 @@ export class UserService {
   }
 
   async getUserData(token: string): Promise<UserDataDto | any> {
-    return await this.userModel.findOne({ token: token }).exec();
+    let user = await this.userModel.findOne({ token: token }).exec();
+    if (!user) return 'invalid token';
+
+    let seenData = await this.seenDataModel.find({ user: user.id }).exec();
+    user.seen = seenData;
+    return user;
   }
 
   async getInviteToken(token: string): Promise<string | any> {
@@ -56,6 +61,8 @@ export class UserService {
   async loginUser(data: UserLoginDto): Promise<string | any> {
     let user = await this.userModel.findOne({ username: data.username }).exec();
 
+    if (!user) return 'Invalid credentials';
+
     var hash = crypto
       .pbkdf2Sync(data.password, user.salt, 1000, 64, `sha512`)
       .toString(`hex`);
@@ -74,9 +81,16 @@ export class UserService {
 
     if (
       (!inviteData || inviteData.taken) &&
-      data.invite_token != '1e9442d1-0eff-4e40-b10f-cfd44e503f5d'
+      data.invite_token != 'magicInvite_Duoc2023'
     ) {
       return 'Invite Invalid';
+    }
+
+    if (inviteData) {
+      let user = await this.userModel.findOne({ id: inviteData.parent_user });
+      if (user.invites_left <= 0) return 'Invite Invalid';
+      user.invites_left = user.invites_left - 1;
+      await user.save();
     }
 
     let salt = crypto.randomBytes(16).toString('hex');
@@ -123,6 +137,14 @@ export class UserService {
   async getUserSeen(token: string): Promise<string | any> {
     let user = await this.userModel.findOne({ token: token }).exec();
     let seenData = await this.seenDataModel.find({ user: user.id }).exec();
+    return seenData;
+  }
+
+  async getUserSeen_filter(token, animeId): Promise<string | any> {
+    let user = await this.userModel.findOne({ token: token }).exec();
+    let seenData = await this.seenDataModel
+      .find({ user: user.id, anime: animeId })
+      .exec();
     return seenData;
   }
 

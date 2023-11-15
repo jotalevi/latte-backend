@@ -8,12 +8,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
+    AnimeDataModule,
+    UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-    AnimeDataModule,
-    UserModule,
     MongooseModule.forRootAsync({
       useFactory: () => {
         return {

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { SeenAnimeEp, SeenAnimeEps } from './dto/UserData.dto';
+import { SeenData } from 'src/seenData/seenData.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -17,6 +17,9 @@ export class User {
 
   @Prop()
   favs: string[];
+
+  @Prop()
+  seen: SeenData[];
 
   @Prop()
   hash: string;
