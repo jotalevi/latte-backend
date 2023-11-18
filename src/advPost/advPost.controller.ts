@@ -11,7 +11,7 @@ import { AdvPostService } from './advPost.service';
 import { ReturnErrorDto } from 'src/dto/ReturnError.dto';
 import { UserService } from 'src/user/user.service';
 import { UserRoles } from 'src/enum/userRoles.enum';
-import { ReturnAdvPostDto } from 'src/dto/returnAdvPost.dto';
+import { ReturnAdvPostDto } from 'src/dto/ReturnAdvPost.dto';
 import { CreateAdvPostDto } from 'src/dto/CreateAdvPost.dto';
 import { EditAdvPostDto } from 'src/dto/EditAdvPost.dto';
 import ReturnListAdvPostDto from 'src/dto/ReturnListAdvPost.dto';

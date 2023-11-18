@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AdvPost } from './advPost.schema';
 import { CreateAdvPostDto } from 'src/dto/CreateAdvPost.dto';
-import { ReturnAdvPostDto } from 'src/dto/returnAdvPost.dto';
+import { ReturnAdvPostDto } from 'src/dto/ReturnAdvPost.dto';
 import { EditAdvPostDto } from 'src/dto/EditAdvPost.dto';
 import ReturnListAdvPostDto from 'src/dto/ReturnListAdvPost.dto';
 

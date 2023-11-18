@@ -1,4 +1,4 @@
-import { ReturnAdvPostDto } from './returnAdvPost.dto';
+import { ReturnAdvPostDto } from './ReturnAdvPost.dto';
 
 export default class ReturnListAdvPostDto {
   count: number;
