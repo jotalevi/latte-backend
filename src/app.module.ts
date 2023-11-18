@@ -5,11 +5,13 @@ import { AnimeDataModule } from './animeData/animeData.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AdvPostModule } from './advPost/advPost.module';
 
 @Module({
   imports: [
     AnimeDataModule,
     UserModule,
+    AdvPostModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

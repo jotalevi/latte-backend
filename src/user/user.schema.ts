@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
+import { UserRoles } from 'src/enum/userRoles.enum';
 import { SeenData } from 'src/seenData/seenData.schema';
 
 export type UserDocument = HydratedDocument<User>;
@@ -29,6 +30,9 @@ export class User {
 
   @Prop()
   token: string;
+
+  @Prop()
+  role: UserRoles;
 
   @Prop()
   invites_left: number;

@@ -16,6 +16,7 @@ import { ReturnAuthTokenDto } from 'src/dto/ReturnAuthToken.dto';
 import { ReturnUserCreatedDto } from 'src/dto/ReturnUserCreated.dto';
 import { ReturnUserFavsDto } from 'src/dto/ReturnUserFavs.dto';
 import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
+import { UserRole } from 'aws-sdk/clients/workmail';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,14 @@ export class UserService {
     @InjectModel(SeenData.name) private seenDataModel: Model<SeenData>,
     @InjectModel(InviteData.name) private inviteDataModel: Model<InviteData>,
   ) {}
+
+  async checkRole(token: string, role: UserRole): Promise<boolean> {
+    let user = await this.userModel.findOne({ token: token }).exec();
+
+    if (!user) return false;
+
+    return user.role == role;
+  }
 
   async checkToken(token: string): Promise<boolean> {
     let user = await this.userModel.findOne({ token: token }).exec();
