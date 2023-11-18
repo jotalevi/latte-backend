@@ -6,7 +6,6 @@ import { CreateAdvPostDto } from 'src/dto/CreateAdvPost.dto';
 import { ReturnAdvPostDto } from 'src/dto/returnAdvPost.dto';
 import { EditAdvPostDto } from 'src/dto/EditAdvPost.dto';
 import ReturnListAdvPostDto from 'src/dto/ReturnListAdvPost.dto';
-import { take } from 'rxjs';
 
 @Injectable()
 export class AdvPostService {
