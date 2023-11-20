@@ -7,10 +7,27 @@ import { ReturnAnimeDto } from 'src/dto/ReturnAnime.dto';
 import { ReturnEpisodeDto } from 'src/dto/ReturnEpisode.dto';
 import { ReturnSearchResultDto } from 'src/dto/ReturnSearchResult.dto';
 import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
+import { ReturnHomePageDto } from 'src/dto/ReturnHomePage.dto';
+import { ReturnUserDataDto } from 'src/dto/ReturnUserData.dto';
 
 @Controller()
 export class AnimeDataController {
   constructor(private userService: UserService) {}
+
+  @Get('homepage')
+  async getHomePage(
+    @Headers('Authorization') token: string,
+  ): Promise<ReturnHomePageDto | ReturnErrorDto> {
+    let userData = await this.userService.getUserData(token.split(' ')[1]);
+    if (!userData)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
+    return Scraper.homepage(userData as ReturnUserDataDto);
+  }
 
   @Get('popular/:page')
   async getPopular(

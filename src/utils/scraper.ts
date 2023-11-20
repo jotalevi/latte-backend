@@ -6,9 +6,101 @@ import { ReturnPopularDto } from 'src/dto/ReturnPopular.dto';
 import { ReturnAnimeDto } from 'src/dto/ReturnAnime.dto';
 import { ReturnEpisodeDto } from 'src/dto/ReturnEpisode.dto';
 import { ReturnSearchResultDto } from 'src/dto/ReturnSearchResult.dto';
-import { ReturnSeenAnimeEps } from 'src/dto/ReturnUserData.dto';
+import {
+  ReturnSeenAnimeEps,
+  ReturnUserDataDto,
+} from 'src/dto/ReturnUserData.dto';
+import { ReturnHomePageDto } from 'src/dto/ReturnHomePage.dto';
+import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
 
 class Scraper {
+  static homepage = async (
+    userData: ReturnUserDataDto,
+  ): Promise<ReturnHomePageDto> => {
+    let resContent = {
+      og_title: 'Watch anime for free on UnLatte',
+      og_image: '',
+      results: [],
+      bookmark: [],
+      continue: [],
+    };
+
+    const getContinueFromIdList = async (
+      anime: ReturnSeenAnimeEps[],
+      userSeen: ReturnSeenAnimeEps[],
+    ): Promise<ReturnAnimeDto[]> => {
+      let results = [];
+
+      for (const tl of anime) {
+        results.push(
+          Scraper.anime(
+            tl.anime,
+            userSeen.filter((seen: ReturnSeenAnimeEps) => {
+              return seen.anime === tl.anime;
+            }),
+          ),
+        );
+      }
+
+      return await Promise.all(results);
+    };
+
+    const getBookmarkFromIdList = async (
+      ids: string[],
+      userSeen: ReturnSeenAnimeEps[],
+    ): Promise<ReturnAnimeDto[]> => {
+      let results = [];
+
+      for (const id of ids) {
+        results.push(
+          await Scraper.anime(
+            id,
+            userSeen.filter((seen: ReturnSeenAnimeEps) => {
+              return seen.anime === id;
+            }),
+          ),
+        );
+      }
+
+      return await Promise.all(results);
+    };
+
+    let bookmarkJob = getBookmarkFromIdList(
+      userData.favs.slice(0, 5),
+      userData.seen,
+    );
+    let continueJob = getContinueFromIdList(
+      userData.seen.slice(0, 5),
+      userData.seen,
+    );
+
+    const { data } = await axios.get(
+      `${config.scrape_url}${config.rule_path.popular}1`,
+    );
+
+    const $ = cheerio.load(data);
+    const items = $('.items>li');
+
+    for (const el of items) {
+      resContent.results.push(
+        await Scraper.anime(
+          $(el)
+            .children()
+            .children()
+            .attr('href')
+            .replace('/category/', '')
+            .replace('/watch/', ''),
+          [],
+        ),
+      );
+    }
+
+    resContent.bookmark = await bookmarkJob;
+    resContent.continue = await continueJob;
+
+    return resContent;
+  };
+
   static popular = async (page: number): Promise<ReturnPopularDto> => {
     let resContent = {
       page: page ?? 1,
@@ -24,22 +116,19 @@ class Scraper {
     const $ = cheerio.load(data);
     const items = $('.items>li');
 
-    items.each(function (idx, el) {
-      let anime = {
-        id: '',
-        thumbnail: '',
-        title: '',
-      };
-      anime.id = $(el)
-        .children()
-        .children()
-        .attr('href')
-        .replace('/category/', '')
-        .replace('/watch/', '');
-      anime.thumbnail = $(el).children().children().children().attr('src');
-      anime.title = $(el).children('.name').children().text();
-      resContent.results.push(anime);
-    });
+    for (const el of items) {
+      resContent.results.push(
+        await Scraper.anime(
+          $(el)
+            .children()
+            .children()
+            .attr('href')
+            .replace('/category/', '')
+            .replace('/watch/', ''),
+          [],
+        ),
+      );
+    }
 
     return resContent;
   };
