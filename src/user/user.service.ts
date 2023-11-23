@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
-import { SeenAnimeEp, UserDataDto } from '../dto/UserData.dto';
+import { SeenAnimeEp } from '../dto/UserData.dto';
 import { UserLoginDto } from '../dto/UserLogin.dto';
 import { UserCreateDto } from '../dto/UserCreate.dto';
 import * as crypto from 'crypto';
@@ -16,7 +16,7 @@ import { ReturnAuthTokenDto } from 'src/dto/ReturnAuthToken.dto';
 import { ReturnUserCreatedDto } from 'src/dto/ReturnUserCreated.dto';
 import { ReturnUserFavsDto } from 'src/dto/ReturnUserFavs.dto';
 import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
-import { UserRole } from 'aws-sdk/clients/workmail';
+import { UserRoles } from 'src/enum/userRoles.enum';
 
 @Injectable()
 export class UserService {
@@ -26,7 +26,7 @@ export class UserService {
     @InjectModel(InviteData.name) private inviteDataModel: Model<InviteData>,
   ) {}
 
-  async checkRole(token: string, role: UserRole): Promise<boolean> {
+  async checkRole(token: string, role: UserRoles): Promise<boolean> {
     let user = await this.userModel.findOne({ token: token }).exec();
 
     if (!user) return false;
