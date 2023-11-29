@@ -52,8 +52,19 @@ export class UserService {
         message: 'Invalid authentication token',
       };
 
-    let seenData = await this.seenDataModel.find({ user: user.id }).exec();
+    let seenData = await this.seenDataModel
+      .find({ user: user.id })
+      .sort([
+        ['anime', 1],
+        ['__v', -1],
+      ])
+      .exec();
     user.seen = seenData;
+
+    user.salt = '';
+    user.hash = '';
+    user.token = '';
+
     return user as ReturnUserDataDto;
   }
 
@@ -277,22 +288,29 @@ export class UserService {
     if (seenData) {
       if (!seenData.episodes.includes(data.episodes)) {
         seenData.episodes.push(data.episodes);
-        await seenData.save();
+        seenData = await seenData.save();
       }
+
+      return {
+        seen: [
+          {
+            anime: seenData.anime,
+            episodes: seenData.episodes,
+          },
+        ],
+      };
+    } else {
+      let returnable = await this.seenDataModel.create({
+        anime: data.anime,
+        user: user.id,
+        episodes: [data.episodes],
+      });
+      await returnable.save();
+      return {
+        seen: await this.seenDataModel
+          .find({ user: user.id, anime: data.anime })
+          .exec(),
+      };
     }
-
-    let returnable = await this.seenDataModel.create({
-      anime: data.anime,
-      user: user.id,
-      episodes: [data.episodes],
-    });
-
-    await returnable.save();
-
-    return {
-      seen: await this.seenDataModel
-        .find({ user: user.id, anime: data.anime })
-        .exec(),
-    };
   }
 }
