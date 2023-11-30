@@ -68,14 +68,8 @@ class Scraper {
       return await Promise.all(results);
     };
 
-    let bookmarkJob = getBookmarkFromIdList(
-      userData.favs.slice(0, 5),
-      userData.seen,
-    );
-    let continueJob = getContinueFromIdList(
-      userData.seen.slice(0, 5),
-      userData.seen,
-    );
+    let bookmarkJob = getBookmarkFromIdList(userData.favs, userData.seen);
+    let continueJob = getContinueFromIdList(userData.seen, userData.seen);
 
     resContent.results = (await this.popular(1)).results;
     resContent.bookmark = await bookmarkJob;
