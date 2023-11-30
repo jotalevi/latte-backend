@@ -12,6 +12,7 @@ import {
 } from 'src/dto/ReturnUserData.dto';
 import { ReturnHomePageDto } from 'src/dto/ReturnHomePage.dto';
 import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
+import ScrapeCache from './ScrapeCache/ScrapeCache';
 
 class Scraper {
   static homepage = async (
@@ -76,27 +77,7 @@ class Scraper {
       userData.seen,
     );
 
-    const { data } = await axios.get(
-      `${config.scrape_url}${config.rule_path.popular}1`,
-    );
-
-    const $ = cheerio.load(data);
-    const items = $('.items>li');
-
-    for (const el of items) {
-      resContent.results.push(
-        await Scraper.anime(
-          $(el)
-            .children()
-            .children()
-            .attr('href')
-            .replace('/category/', '')
-            .replace('/watch/', ''),
-          [],
-        ),
-      );
-    }
-
+    resContent.results = (await this.popular(1)).results;
     resContent.bookmark = await bookmarkJob;
     resContent.continue = await continueJob;
 
@@ -104,6 +85,17 @@ class Scraper {
   };
 
   static popular = async (page: number): Promise<ReturnPopularDto> => {
+    let cache = ScrapeCache.get('popular', [
+      {
+        paramName: 'page',
+        paramValue: page.toString(),
+      },
+    ]);
+
+    if (cache) {
+      return cache as ReturnPopularDto;
+    }
+
     let resContent = {
       page: page ?? 1,
       og_title: 'Watch anime for free on UnLatte',
@@ -132,6 +124,17 @@ class Scraper {
       );
     }
 
+    ScrapeCache.cache(
+      'popular',
+      [
+        {
+          paramName: 'page',
+          paramValue: page.toString(),
+        },
+      ],
+      resContent,
+    );
+
     return resContent;
   };
 
@@ -150,6 +153,18 @@ class Scraper {
       type: '',
       episodes: [],
     };
+    let cache = ScrapeCache.get('anime', [
+      {
+        paramName: 'anime_id',
+        paramValue: anime_id,
+      },
+    ]);
+
+    if (cache) {
+      console.log('there is cache for anime ' + anime_id);
+      cache['seen'] = userSeenData;
+      return cache as ReturnAnimeDto;
+    }
 
     const { data } = await axios.get(
       `${config.scrape_url}${config.rule_path.anime}${anime_id}`,
@@ -161,7 +176,7 @@ class Scraper {
     resContent.thumbnail = animeInfo.children('img').attr('src');
 
     let aInfoTag = animeInfo.children('.type');
-    console.log();
+
     resContent.type = parse(stringify(aInfoTag[0].children[2])).attribs.title;
     resContent.info = parse(stringify(aInfoTag[1].children[1])).data;
 
@@ -178,6 +193,17 @@ class Scraper {
     resContent.og_title = `Whatch ${resContent.title} for free on Latte`;
     resContent.og_image = resContent.thumbnail;
 
+    ScrapeCache.cache(
+      'anime',
+      [
+        {
+          paramName: 'anime_id',
+          paramValue: anime_id,
+        },
+      ],
+      resContent,
+    );
+
     return resContent;
   };
 
@@ -185,6 +211,21 @@ class Scraper {
     anime_id: string,
     episode_id: string,
   ): Promise<ReturnEpisodeDto> => {
+    let cache = ScrapeCache.get('episode', [
+      {
+        paramName: 'anime_id',
+        paramValue: anime_id,
+      },
+      {
+        paramName: 'episode_id',
+        paramValue: episode_id,
+      },
+    ]);
+
+    if (cache) {
+      return cache as ReturnEpisodeDto;
+    }
+
     let resContent = {
       anime: anime_id,
       episode: episode_id,
@@ -228,6 +269,21 @@ class Scraper {
     } finally {
       resContent.nextEp = nxtContent.split('-').slice(-1)[0];
     }
+
+    ScrapeCache.cache(
+      'episode',
+      [
+        {
+          paramName: 'anime_id',
+          paramValue: anime_id,
+        },
+        {
+          paramName: 'episode_id',
+          paramValue: episode_id,
+        },
+      ],
+      resContent,
+    );
 
     return resContent;
   };

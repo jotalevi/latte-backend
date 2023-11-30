@@ -1,7 +1,7 @@
 #!/bin/sh
 
 git pull
-rm -r node_modules
+rm src/utils/ScrapeCache/filemap.json
 npm i
 npm run build
 pm2 delete latte_BE
