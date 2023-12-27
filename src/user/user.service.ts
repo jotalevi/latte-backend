@@ -136,19 +136,19 @@ export class UserService {
   async registerUser(
     data: UserCreateDto,
   ): Promise<ReturnUserCreatedDto | ReturnErrorDto> {
-    let inviteData = await this.inviteDataModel
-      .findOne({
-        token: data.invite_token,
-      })
-      .exec();
+    //let inviteData = await this.inviteDataModel
+    //  .findOne({
+    //    token: data.invite_token,
+    //  })
+    //  .exec();
 
-    if ((!inviteData || inviteData.taken) && data.invite_token != '') {
-      return {
-        status: 403,
-        error_code: 'UNINVITED',
-        message: 'You must have a valid invite code to register',
-      };
-    }
+    //if ((!inviteData || inviteData.taken) && data.invite_token != '') {
+    //  return {
+    //    status: 403,
+    //    error_code: 'UNINVITED',
+    //    message: 'You must have a valid invite code to register',
+    //  };
+    //}
 
     if (
       (await this.userModel.find({ username: data.username }).exec()) ||
@@ -160,19 +160,19 @@ export class UserService {
         message: 'There is already an account with this username or mail',
       };
 
-    if (inviteData) {
-      let user = await this.userModel
-        .findOne({ id: inviteData.parent_user })
-        .exec();
-      if (user.invites_left <= 0)
-        return {
-          status: 403,
-          error_code: 'UNINVITED',
-          message: 'You must have a valid invite code to register',
-        };
-      user.invites_left = user.invites_left - 1;
-      await user.save();
-    }
+    //if (inviteData) {
+    //  let user = await this.userModel
+    //    .findOne({ id: inviteData.parent_user })
+    //    .exec();
+    //  if (user.invites_left <= 0)
+    //    return {
+    //      status: 403,
+    //      error_code: 'UNINVITED',
+    //      message: 'You must have a valid invite code to register',
+    //    };
+    //  user.invites_left = user.invites_left - 1;
+    //  await user.save();
+    //}
 
     let salt = crypto.randomBytes(16).toString('hex');
     const createdUser = new this.userModel({
@@ -189,11 +189,11 @@ export class UserService {
       invites_left: 5,
     });
 
-    if (inviteData) {
-      inviteData.taken = true;
-      inviteData.child_user = createdUser.id;
-      await inviteData.save();
-    }
+    //if (inviteData) {
+    //  inviteData.taken = true;
+    //  inviteData.child_user = createdUser.id;
+    //  await inviteData.save();
+    //}
 
     return (await createdUser.save()) as ReturnUserCreatedDto;
   }
