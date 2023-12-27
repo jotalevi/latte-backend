@@ -1,5 +1,5 @@
 const config = {
-  port: 3000,
+  port: 3001,
   scrape_url: 'https://ww6.gogoanimes.org',
   rule_path: {
     popular: '/popular?page=',
