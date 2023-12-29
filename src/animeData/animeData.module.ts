@@ -5,6 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { User, UserSchema } from 'src/user/user.schema';
 import { SeenData, SeenDataSchema } from 'src/seenData/seenData.schema';
 import { InviteData, InviteDataSchema } from 'src/inviteData/inviteData.schema';
+import { RenewToken, RenewTokenSchema } from 'src/renewToken/renewToken.schema';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { InviteData, InviteDataSchema } from 'src/inviteData/inviteData.schema';
       { name: User.name, schema: UserSchema },
       { name: SeenData.name, schema: SeenDataSchema },
       { name: InviteData.name, schema: InviteDataSchema },
+      { name: RenewToken.name, schema: RenewTokenSchema },
     ]),
   ],
   controllers: [AnimeDataController],

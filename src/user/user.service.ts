@@ -17,6 +17,8 @@ import { ReturnUserCreatedDto } from 'src/dto/ReturnUserCreated.dto';
 import { ReturnUserFavsDto } from 'src/dto/ReturnUserFavs.dto';
 import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
 import { UserRoles } from 'src/enum/userRoles.enum';
+import { RenewToken } from 'src/renewToken/renewToken.schema';
+import { RenewUserTokenDto } from 'src/dto/RenewUserToken.dto';
 
 @Injectable()
 export class UserService {
@@ -24,6 +26,7 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(SeenData.name) private seenDataModel: Model<SeenData>,
     @InjectModel(InviteData.name) private inviteDataModel: Model<InviteData>,
+    @InjectModel(RenewToken.name) private renewTokenModel: Model<RenewToken>,
   ) {}
 
   async checkRole(token: string, role: UserRoles): Promise<boolean> {
@@ -107,6 +110,7 @@ export class UserService {
 
   async loginUser(
     data: UserLoginDto,
+    ip: string,
   ): Promise<ReturnAuthTokenDto | ReturnErrorDto> {
     let user = await this.userModel.findOne({ username: data.username }).exec();
 
@@ -123,14 +127,52 @@ export class UserService {
 
     if (user.hash === hash) {
       user.token = uuidv4();
+      let renew = await this.renewTokenModel.create({
+        user: user.id,
+        ip: ip,
+        token: uuidv4(),
+      });
+      await renew.save();
       user.save();
-      return { token: user.token };
+      return { token: user.token, renew: renew.token };
     } else
       return {
         status: 403,
         error_code: 'INVALID_TOKEN',
         message: 'Invalid authentication token',
       };
+  }
+
+  async renewUserToken(
+    data: RenewUserTokenDto,
+    ip: string,
+  ): Promise<ReturnAuthTokenDto | ReturnErrorDto> {
+    let renewer = await this.renewTokenModel
+      .findOne({ token: data.token, ip: ip })
+      .exec();
+
+    if (!renewer)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
+    let user = await this.userModel.findOne({ id: renewer.user }).exec();
+
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID_TOKEN',
+        message: 'Invalid authentication token',
+      };
+
+    user.token = uuidv4();
+    renewer.token = uuidv4();
+
+    renewer.save();
+    user.save();
+    return { token: user.token, renew: renewer.token };
   }
 
   async registerUser(

@@ -1,7 +1,7 @@
-import { Body, Controller, Param, Post, Get, Headers } from '@nestjs/common';
+import { Body, Controller, Post, Get, Headers, Ip } from '@nestjs/common';
 import { UserLoginDto } from '../dto/UserLogin.dto';
 import { UserCreateDto } from '../dto/UserCreate.dto';
-import { UserDataDto, SeenAnimeEp } from '../dto/UserData.dto';
+import { SeenAnimeEp } from '../dto/UserData.dto';
 import { UserService } from './user.service';
 import { ReturnErrorDto } from 'src/dto/ReturnError.dto';
 import { ReturnUserDataDto } from 'src/dto/ReturnUserData.dto';
@@ -10,6 +10,7 @@ import { ReturnAuthTokenDto } from 'src/dto/ReturnAuthToken.dto';
 import { ReturnUserCreatedDto } from 'src/dto/ReturnUserCreated.dto';
 import { ReturnUserFavsDto } from 'src/dto/ReturnUserFavs.dto';
 import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
+import { RenewUserTokenDto } from 'src/dto/RenewUserToken.dto';
 
 @Controller()
 export class UserController {
@@ -32,8 +33,17 @@ export class UserController {
   @Post('u/login')
   async loginUser(
     @Body() data: UserLoginDto,
+    @Ip() ip: string,
   ): Promise<ReturnAuthTokenDto | ReturnErrorDto> {
-    return await this.userService.loginUser(data);
+    return await this.userService.loginUser(data, ip);
+  }
+
+  @Post('u/renew')
+  async renewUserToken(
+    @Body() data: RenewUserTokenDto,
+    @Ip() ip: string,
+  ): Promise<ReturnAuthTokenDto | ReturnErrorDto> {
+    return await this.userService.renewUserToken(data, ip);
   }
 
   @Post('u/register')
