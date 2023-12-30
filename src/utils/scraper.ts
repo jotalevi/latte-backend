@@ -221,7 +221,7 @@ class Scraper {
     //const $ = cheerio.load(data);
 
     //console.log($('.mirror_link:first'));
-    return '';
+    return donwloadUrl;
   };
 
   static episode = async (
