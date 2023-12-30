@@ -11,8 +11,9 @@ import {
   ReturnUserDataDto,
 } from 'src/dto/ReturnUserData.dto';
 import { ReturnHomePageDto } from 'src/dto/ReturnHomePage.dto';
-import { ReturnUserSeenDto } from 'src/dto/ReturnUserSeen.dto';
 import ScrapeCache from './ScrapeCache/ScrapeCache';
+
+const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
 
 class Scraper {
   static homepage = async (
@@ -201,6 +202,28 @@ class Scraper {
     return resContent;
   };
 
+  static getCleanMediaUrl = async (mediaUrl: string): Promise<string> => {
+    let donwloadUrl = `https://goone.pro/download?id=${
+      mediaUrl.split('streaming.php?id=')[1].split('&')[0]
+    }`;
+
+    let driver = await new Builder().forBrowser(Browser.FIREFOX).build();
+    try {
+      await driver.get(donwloadUrl);
+      await driver.findElement(By.class('q')).sendKeys('webdriver', Key.RETURN);
+      await driver.wait(3000);
+    } finally {
+      await driver.quit();
+    }
+
+    console.log(donwloadUrl);
+
+    //const $ = cheerio.load(data);
+
+    //console.log($('.mirror_link:first'));
+    return '';
+  };
+
   static episode = async (
     anime_id: string,
     episode_id: string,
@@ -216,9 +239,9 @@ class Scraper {
       },
     ]);
 
-    if (cache) {
-      return cache as ReturnEpisodeDto;
-    }
+    //if (cache) {
+    //  return cache as ReturnEpisodeDto;
+    //}
 
     let resContent = {
       anime: anime_id,
@@ -238,7 +261,9 @@ class Scraper {
 
     resContent.title = $('.anime_video_body').children('h1').text();
     resContent.og_title = resContent.title;
-    resContent.media_url = $('iframe').attr('src').toString();
+    resContent.media_url = await this.getCleanMediaUrl(
+      $('iframe').attr('src').toString(),
+    );
 
     let pvfContent = '_';
     try {
