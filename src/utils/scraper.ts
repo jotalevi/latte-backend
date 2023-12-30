@@ -204,6 +204,17 @@ class Scraper {
   };
 
   static getCleanMediaUrl = async (mediaUrl: string): Promise<string> => {
+    let cache = ScrapeCache.get('cleanMediaUrl', [
+      {
+        paramName: 'media_url',
+        paramValue: mediaUrl,
+      },
+    ]);
+
+    if (cache) {
+      return cache as string;
+    }
+
     let donwloadUrl = `https://goone.pro/download?id=${
       mediaUrl.split('streaming.php?id=')[1].split('&')[0]
     }`;
@@ -211,7 +222,9 @@ class Scraper {
     let returnableUrl = '';
     let driver = await new Builder()
       .forBrowser(Browser.FIREFOX)
-      .setFirefoxOptions(new firefox.Options().headless())
+      .setFirefoxOptions(
+        new firefox.Options().headless().setBinary('/usr/bin/firefox'),
+      )
       .build();
     try {
       await driver.get(donwloadUrl);
@@ -233,6 +246,16 @@ class Scraper {
       await driver.quit();
     }
 
+    ScrapeCache.cache(
+      'cleanMediaUrl',
+      [
+        {
+          paramName: 'media_url',
+          paramValue: mediaUrl,
+        },
+      ],
+      returnableUrl,
+    );
     return returnableUrl;
   };
 
@@ -251,9 +274,9 @@ class Scraper {
       },
     ]);
 
-    //if (cache) {
-    //  return cache as ReturnEpisodeDto;
-    //}
+    if (cache) {
+      return cache as ReturnEpisodeDto;
+    }
 
     let resContent = {
       anime: anime_id,
