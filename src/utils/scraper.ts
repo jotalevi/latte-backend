@@ -14,6 +14,7 @@ import { ReturnHomePageDto } from 'src/dto/ReturnHomePage.dto';
 import ScrapeCache from './ScrapeCache/ScrapeCache';
 
 const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
+const firefox = require('selenium-webdriver/firefox');
 
 class Scraper {
   static homepage = async (
@@ -207,21 +208,32 @@ class Scraper {
       mediaUrl.split('streaming.php?id=')[1].split('&')[0]
     }`;
 
-    let driver = await new Builder().forBrowser(Browser.FIREFOX).build();
+    let returnableUrl = '';
+    let driver = await new Builder()
+      .forBrowser(Browser.FIREFOX)
+      .setFirefoxOptions(new firefox.Options().headless())
+      .build();
     try {
       await driver.get(donwloadUrl);
-      await driver.findElement(By.class('q')).sendKeys('webdriver', Key.RETURN);
-      await driver.wait(3000);
+      for (let i = 1; i <= 50; i++) {
+        try {
+          let mediaA = await driver
+            .findElement(
+              By.xpath(
+                `/html/body/section/div/div[2]/div/div[4]/div[1]/div[${i}]/a`,
+              ),
+            )
+            .getAttribute('href');
+          returnableUrl = mediaA;
+        } catch {
+          break;
+        }
+      }
     } finally {
       await driver.quit();
     }
 
-    console.log(donwloadUrl);
-
-    //const $ = cheerio.load(data);
-
-    //console.log($('.mirror_link:first'));
-    return donwloadUrl;
+    return returnableUrl;
   };
 
   static episode = async (
