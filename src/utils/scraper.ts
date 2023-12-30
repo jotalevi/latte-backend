@@ -223,7 +223,7 @@ class Scraper {
     let driver = await new Builder()
       .forBrowser(Browser.FIREFOX)
       .setFirefoxOptions(
-        new firefox.Options().headless().setBinary('/usr/bin/firefox'),
+        new firefox.Options().headless().setBinary('/home/ubuntu/geckodriver'),
       )
       .build();
     try {
