@@ -204,64 +204,26 @@ class Scraper {
   };
 
   static getCleanMediaUrl = async (mediaUrl: string): Promise<string> => {
-    let cache = ScrapeCache.get('cleanMediaUrl', [
-      {
-        paramName: 'media_url',
-        paramValue: mediaUrl,
-      },
-    ]);
-
-    if (cache) {
-      return cache as string;
-    }
-
     let donwloadUrl = `https://goone.pro/download?id=${
       mediaUrl.split('streaming.php?id=')[1].split('&')[0]
     }`;
-
-    let returnableUrl = '';
-    let driver = await new Builder()
-      .forBrowser(Browser.FIREFOX)
-      .setFirefoxOptions(
-        new firefox.Options().headless().setBinary('/home/ubuntu/geckodriver'),
-      )
-      .build();
-    try {
-      await driver.get(donwloadUrl);
-      for (let i = 1; i <= 50; i++) {
-        try {
-          let mediaA = await driver
-            .findElement(
-              By.xpath(
-                `/html/body/section/div/div[2]/div/div[4]/div[1]/div[${i}]/a`,
-              ),
-            )
-            .getAttribute('href');
-          returnableUrl = mediaA;
-        } catch {
-          break;
-        }
-      }
-    } finally {
-      await driver.quit();
-    }
-
-    ScrapeCache.cache(
-      'cleanMediaUrl',
-      [
-        {
-          paramName: 'media_url',
-          paramValue: mediaUrl,
-        },
-      ],
-      returnableUrl,
+    const scraperapiClient = require('scraperapi-sdk')(
+      '6a5d76d6ec710218db36702c72cd5cd1',
     );
-    return returnableUrl;
+    let scrapedData = await scraperapiClient.get(donwloadUrl, {
+      render: true,
+      wait_for_selector: '#content-download > div:nth-child(1) > h6',
+      ultra_premium: true,
+    });
+    console.log(scrapedData.body.toString());
+
+    return donwloadUrl;
   };
 
   static episode = async (
     anime_id: string,
     episode_id: string,
+    devrq: boolean,
   ): Promise<ReturnEpisodeDto> => {
     let cache = ScrapeCache.get('episode', [
       {
@@ -274,9 +236,9 @@ class Scraper {
       },
     ]);
 
-    if (cache) {
-      return cache as ReturnEpisodeDto;
-    }
+    //if (cache) {
+    //  return cache as ReturnEpisodeDto;
+    //}
 
     let resContent = {
       anime: anime_id,
@@ -296,9 +258,13 @@ class Scraper {
 
     resContent.title = $('.anime_video_body').children('h1').text();
     resContent.og_title = resContent.title;
-    resContent.media_url = await this.getCleanMediaUrl(
-      $('iframe').attr('src').toString(),
-    );
+    if (devrq) {
+      resContent.media_url = await this.getCleanMediaUrl(
+        $('iframe').attr('src').toString(),
+      );
+    } else {
+      resContent.media_url = $('iframe').attr('src').toString();
+    }
 
     let pvfContent = '_';
     try {

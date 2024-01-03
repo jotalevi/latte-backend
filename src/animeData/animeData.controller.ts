@@ -70,6 +70,7 @@ export class AnimeDataController {
   async getAnimeEpisode(
     @Param('id') id: string,
     @Param('ep') ep: string,
+    @Param('dev') dev: boolean,
     @Headers('Authorization') token: string,
   ): Promise<ReturnEpisodeDto | ReturnErrorDto> {
     if (!(await this.userService.checkToken(token.split(' ')[1])))
@@ -83,7 +84,7 @@ export class AnimeDataController {
       anime: id,
       episodes: ep,
     });
-    return Scraper.episode(id, ep);
+    return Scraper.episode(id, ep, dev);
   }
 
   @Get('search/')
