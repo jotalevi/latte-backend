@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdvPostModule } from './advPost/advPost.module';
+import config  from './utils/configs';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { AdvPostModule } from './advPost/advPost.module';
     MongooseModule.forRootAsync({
       useFactory: () => {
         return {
-          uri: process.env.MONGO_URL,
+          uri: config.mongo_url,
         };
       },
     }),

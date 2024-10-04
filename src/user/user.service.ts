@@ -192,9 +192,12 @@ export class UserService {
     //  };
     //}
 
+    console.log(await this.userModel.find({ username: data.username }).exec())
+    console.log(await this.userModel.find({ mail: data.mail }).exec())
+
     if (
-      (await this.userModel.find({ username: data.username }).exec()) ||
-      (await this.userModel.find({ mail: data.mail }).exec())
+      (await this.userModel.findOne({ username: data.username }).exec()) ||
+      (await this.userModel.findOne({ mail: data.mail }).exec())
     )
       return {
         status: 405,
