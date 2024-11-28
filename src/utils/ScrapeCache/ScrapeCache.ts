@@ -30,7 +30,7 @@ export default class ScrapeCache {
   }
 
   static cache(
-    requestName: String,
+    requestName: string,
     requestParams: RequestParams[],
     cacheData: any,
   ) {
@@ -55,7 +55,7 @@ export default class ScrapeCache {
   }
 
   static get(
-    requestName: String,
+    requestName: string,
     requestParams: RequestParams[],
   ): Object | boolean {
     for (const item of this.fileMap) {

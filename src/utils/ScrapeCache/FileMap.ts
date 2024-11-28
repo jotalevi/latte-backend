@@ -1,7 +1,7 @@
 import RequestParams from './RequestParams';
 
 export default class FileMap {
-  requestName: String;
+  requestName: string;
   requestParams: RequestParams[];
-  cacheData: String;
+  cacheData: string;
 }
