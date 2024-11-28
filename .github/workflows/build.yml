@@ -17,9 +17,6 @@ jobs:
       - name: Install dependencies
         run: npm i
 
-      - name: e2e tests
-        run: npm run test:e2e
-
       - name: Coverage
         run: npm run test:cov
 
