@@ -13,9 +13,6 @@ import {
 import { ReturnHomePageDto } from 'src/dto/ReturnHomePage.dto';
 import ScrapeCache from './ScrapeCache/ScrapeCache';
 
-const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
-const firefox = require('selenium-webdriver/firefox');
-
 class Scraper {
   static readonly homepage = async (
     userData: ReturnUserDataDto,
@@ -201,7 +198,9 @@ class Scraper {
     return resContent;
   };
 
-  static readonly getCleanMediaUrl = async (mediaUrl: string): Promise<string> => {
+  static readonly getCleanMediaUrl = async (
+    mediaUrl: string,
+  ): Promise<string> => {
     let donwloadUrl = `https://goone.pro/download?id=${
       mediaUrl.split('streaming.php?id=')[1].split('&')[0]
     }`;
@@ -306,7 +305,9 @@ class Scraper {
     return resContent;
   };
 
-  static readonly search = async (query_str: string): Promise<ReturnSearchResultDto> => {
+  static readonly search = async (
+    query_str: string,
+  ): Promise<ReturnSearchResultDto> => {
     let resContent = {
       query: query_str,
       og_title: "Results for ' " + query_str + "' on UnLatte",

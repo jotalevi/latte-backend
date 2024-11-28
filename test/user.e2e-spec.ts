@@ -8,6 +8,8 @@ describe('UserController (e2e)', () => {
   let app: INestApplication;
   let authToken: string;
   let renewToken: string;
+  let username = 'testuser' + Math.floor(Math.random() * 1000);
+  let usermail = 'testuser' + Math.floor(Math.random() * 1000) + '@example.com';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -29,9 +31,9 @@ describe('UserController (e2e)', () => {
 
   it('should register user (POST /u/register)', async () => {
     const userData = {
-      username: 'testuser',
+      username: username,
       password: 'testpass',
-      mail: 'testuser@example.com',
+      mail: usermail,
     };
 
     const response = await request(app.getHttpServer())
@@ -130,7 +132,7 @@ describe('UserController (e2e)', () => {
   });
 
   it('should delete user (DELETE /u/)', async () => {
-    const response = await request(app.getHttpServer())
+    request(app.getHttpServer())
       .delete('/u')
       .set('Authorization', `Bearer ${authToken}`)
       .send()
