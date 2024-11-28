@@ -25,8 +25,10 @@ export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(SeenData.name) private readonly seenDataModel: Model<SeenData>,
-    @InjectModel(InviteData.name) private readonly inviteDataModel: Model<InviteData>,
-    @InjectModel(RenewToken.name) private readonly renewTokenModel: Model<RenewToken>,
+    @InjectModel(InviteData.name)
+    private readonly inviteDataModel: Model<InviteData>,
+    @InjectModel(RenewToken.name)
+    private readonly renewTokenModel: Model<RenewToken>,
   ) {}
 
   async checkRole(token: string, role: UserRoles): Promise<boolean> {
@@ -192,8 +194,8 @@ export class UserService {
     //  };
     //}
 
-    console.log(await this.userModel.find({ username: data.username }).exec())
-    console.log(await this.userModel.find({ mail: data.mail }).exec())
+    console.log(await this.userModel.find({ username: data.username }).exec());
+    console.log(await this.userModel.find({ mail: data.mail }).exec());
 
     if (
       (await this.userModel.findOne({ username: data.username }).exec()) ||
@@ -357,5 +359,22 @@ export class UserService {
           .exec(),
       };
     }
+  }
+
+  async deleteUser(token: string): Promise<User | any> {
+    let user = await this.userModel.findOne({ token: token }).exec();
+
+    if (!user)
+      return {
+        status: 403,
+        error_code: 'INVALID',
+      };
+
+    await this.userModel.deleteOne({ id: user.id }).exec();
+
+    return {
+      status: 204,
+      message: 'User deleted',
+    };
   }
 }

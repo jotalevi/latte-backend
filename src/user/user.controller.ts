@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Get, Headers, Ip } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Headers,
+  Ip,
+  Delete,
+} from '@nestjs/common';
 import { UserLoginDto } from '../dto/UserLogin.dto';
 import { UserCreateDto } from '../dto/UserCreate.dto';
 import { SeenAnimeEp } from '../dto/UserData.dto';
@@ -81,5 +89,12 @@ export class UserController {
     @Body() seenData: SeenAnimeEp,
   ): Promise<ReturnUserSeenDto | ReturnErrorDto> {
     return await this.userService.pushSeen(token.split(' ')[1], seenData);
+  }
+
+  @Delete('u/')
+  async deleteUser(
+    @Headers('Authorization') token: string,
+  ): Promise<ReturnErrorDto> {
+    return await this.userService.deleteUser(token.split(' ')[1]);
   }
 }
