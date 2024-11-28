@@ -14,7 +14,7 @@ import { RenewUserTokenDto } from 'src/dto/RenewUserToken.dto';
 
 @Controller()
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get('u')
   async getUserData(

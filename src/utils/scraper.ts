@@ -33,10 +33,8 @@ class Scraper {
       userSeen: ReturnSeenAnimeEps[],
     ): Promise<ReturnAnimeDto[]> => {
       let results = [];
-      let ids = [];
 
       for (const tl of anime) {
-        ids.push(tl.anime);
         results.push(
           Scraper.anime(
             tl.anime,
@@ -236,9 +234,9 @@ class Scraper {
       },
     ]);
 
-    //if (cache) {
-    //  return cache as ReturnEpisodeDto;
-    //}
+    if (cache) {
+      return cache as ReturnEpisodeDto;
+    }
 
     let resContent = {
       anime: anime_id,

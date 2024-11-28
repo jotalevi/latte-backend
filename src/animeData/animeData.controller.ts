@@ -12,7 +12,7 @@ import { ReturnUserDataDto } from 'src/dto/ReturnUserData.dto';
 
 @Controller()
 export class AnimeDataController {
-  constructor(private userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get('homepage')
   async getHomePage(

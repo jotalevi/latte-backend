@@ -10,7 +10,7 @@ import ReturnListAdvPostDto from 'src/dto/ReturnListAdvPost.dto';
 @Injectable()
 export class AdvPostService {
   constructor(
-    @InjectModel(AdvPost.name) private advPostModel: Model<AdvPost>,
+    @InjectModel(AdvPost.name) private readonly advPostModel: Model<AdvPost>,
   ) {}
 
   async postAdv(data: CreateAdvPostDto): Promise<ReturnAdvPostDto> {

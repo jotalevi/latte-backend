@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import RequestParams from './RequestParams';
 import FileMap from './FileMap';
-import { v4 as uuidv4 } from 'uuid';
 
 export default class ScrapeCache {
   static fileMap: FileMap[] = [];

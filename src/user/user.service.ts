@@ -23,10 +23,10 @@ import { RenewUserTokenDto } from 'src/dto/RenewUserToken.dto';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(SeenData.name) private seenDataModel: Model<SeenData>,
-    @InjectModel(InviteData.name) private inviteDataModel: Model<InviteData>,
-    @InjectModel(RenewToken.name) private renewTokenModel: Model<RenewToken>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(SeenData.name) private readonly seenDataModel: Model<SeenData>,
+    @InjectModel(InviteData.name) private readonly inviteDataModel: Model<InviteData>,
+    @InjectModel(RenewToken.name) private readonly renewTokenModel: Model<RenewToken>,
   ) {}
 
   async checkRole(token: string, role: UserRoles): Promise<boolean> {
@@ -121,7 +121,7 @@ export class UserService {
         message: 'Invalid authentication token',
       };
 
-    var hash = crypto
+    const hash = crypto
       .pbkdf2Sync(data.password, user.salt, 1000, 64, `sha512`)
       .toString(`hex`);
 

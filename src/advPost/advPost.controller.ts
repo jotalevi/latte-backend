@@ -19,8 +19,8 @@ import ReturnListAdvPostDto from 'src/dto/ReturnListAdvPost.dto';
 @Controller()
 export class AdvPostController {
   constructor(
-    private advPostService: AdvPostService,
-    private userService: UserService,
+    private readonly advPostService: AdvPostService,
+    private readonly userService: UserService,
   ) {}
 
   @Post('adv')
