@@ -3,8 +3,8 @@ import RequestParams from './RequestParams';
 import FileMap from './FileMap';
 
 export default class ScrapeCache {
-  static fileMap: FileMap[] = [];
-  static filePrefix = './src/utils/ScrapeCache/';
+  static readonly fileMap: FileMap[] = [];
+  static readonly filePrefix = './src/utils/ScrapeCache/';
 
   static init() {
     try {

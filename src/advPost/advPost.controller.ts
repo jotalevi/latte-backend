@@ -75,8 +75,8 @@ export class AdvPostController {
 
   @Get('announces')
   async getActiveAdv(
-    @Query('max') max: number = 5,
     @Headers('Authorization') token: string,
+    @Query('max') max: number = 5,
   ): Promise<ReturnListAdvPostDto | ReturnErrorDto> {
     if (!(await this.userService.checkToken(token.split(' ')[1])))
       return {

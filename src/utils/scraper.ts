@@ -17,7 +17,7 @@ const { Builder, Browser, By, Key, until } = require('selenium-webdriver');
 const firefox = require('selenium-webdriver/firefox');
 
 class Scraper {
-  static homepage = async (
+  static readonly homepage = async (
     userData: ReturnUserDataDto,
   ): Promise<ReturnHomePageDto> => {
     let resContent = {
@@ -78,7 +78,7 @@ class Scraper {
     return resContent;
   };
 
-  static popular = async (page: number): Promise<ReturnPopularDto> => {
+  static readonly popular = async (page: number): Promise<ReturnPopularDto> => {
     let cache = ScrapeCache.get('popular', [
       {
         paramName: 'page',
@@ -132,7 +132,7 @@ class Scraper {
     return resContent;
   };
 
-  static anime = async (
+  static readonly anime = async (
     anime_id: string,
     userSeenData: ReturnSeenAnimeEps[],
   ): Promise<ReturnAnimeDto> => {
@@ -201,7 +201,7 @@ class Scraper {
     return resContent;
   };
 
-  static getCleanMediaUrl = async (mediaUrl: string): Promise<string> => {
+  static readonly getCleanMediaUrl = async (mediaUrl: string): Promise<string> => {
     let donwloadUrl = `https://goone.pro/download?id=${
       mediaUrl.split('streaming.php?id=')[1].split('&')[0]
     }`;
@@ -218,7 +218,7 @@ class Scraper {
     return donwloadUrl;
   };
 
-  static episode = async (
+  static readonly episode = async (
     anime_id: string,
     episode_id: string,
     devrq: boolean,
@@ -306,7 +306,7 @@ class Scraper {
     return resContent;
   };
 
-  static search = async (query_str: string): Promise<ReturnSearchResultDto> => {
+  static readonly search = async (query_str: string): Promise<ReturnSearchResultDto> => {
     let resContent = {
       query: query_str,
       og_title: "Results for ' " + query_str + "' on UnLatte",
