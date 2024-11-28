@@ -361,7 +361,7 @@ export class UserService {
     }
   }
 
-  async deleteUser(token: string): Promise<User | any> {
+  async deleteUser(token: string): Promise<any> {
     let user = await this.userModel.findOne({ token: token }).exec();
 
     if (!user)
